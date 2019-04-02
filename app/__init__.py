@@ -52,8 +52,8 @@ Backage_Number_of_seller = Backage_Number_of_buyer = 1
 detemined_Base_sell = 0
 Base_for_Selling = 1
 
-TOKEN = "873380531:AAEhMfHcaTC8YwrqVeIyANJl7uqd0sZ8tFk"  # broker_navasan_bot
-webhook_address = "https://broker-navasan-bot.herokuapp.com/" + TOKEN
+TOKEN = "859896296:AAENaPuUpPrAkUH6GP111hid32biyDrWbDk"  # Auction_currency_bot
+webhook_address = "https://auction-currency-bot.herokuapp.com//" + TOKEN
 
 bot = Bot( TOKEN )
 
