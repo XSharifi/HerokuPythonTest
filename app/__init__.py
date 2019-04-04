@@ -611,10 +611,7 @@ def text_analysing(txts, Dict_message, update):
 
             elif text.replace( " ", "" ) == '#پایه' and ( Dict_message['message']['from']['username'] == 'zanyar_sharifi' or
                                                           Dict_message['message']['from']['username'] == 'Xaniar_kh91' or
-                                                          Dict_message['message']['from']['username'] == 'xaniar_sharifi' or
-                                                          Dict_message['message']['from']['username'] == 'Nasrabed'or
-                                                          Dict_message['message']['from']['username'] == 'ali_nazi_66'or
-                                                          Dict_message['message']['from']['username'] == 'Ali1369Sadra'):
+                                                          Dict_message['message']['from']['username'] == 'xaniar_sharifi'):
 
                 Base_for_Selling = calculating_for_base_price( txts, update )
                 # if str(Base_for_Selling).isdigit():
@@ -934,19 +931,6 @@ def text_analysing(txts, Dict_message, update):
                                                 high_price = getting_basic_prices_in_systemfile( 'high_price' )
                                                 Accepted_Bidding = checking_real_value_of_price( Accepted_Bidding,
                                                                                                  low_price, high_price )
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1696,6 +1680,55 @@ def help(bot, update):
     bot.sendMessage( update.message.chat_id, text=text_of_help )
 
 
+
+
+
+def show_deposite_members(update):
+    global Dict_of_Deposit
+    filepath = os.getcwd() + '//' + 'Dict_of_Deposit.txt'
+    if os.path.exists( 'Dict_of_Deposit.txt' ):
+        with open( filepath, 'r' ) as myfile:
+            Dict_of_Deposit = json.loads( myfile.read() )
+            myfile.close()
+            # counter = 0
+            Disp = ''
+            for key, value in Dict_of_Deposit.items():
+                Disp = Disp + 'کاربر با آیدی ' + str( key ) + '\n' + str( Dict_of_Deposit[key] ) + '\n'
+            update.message.reply_text( Disp )
+    else:
+        update.message.reply_text( 'مدیر گرامی در حال حاضر هیچ بیعنامه ای برای  کاربر ها ثبت نشده است' )
+
+
+
+def show_base_price(update):
+
+    found=0
+    Disp = ''
+    filepath = os.getcwd() + '//' + 'low_price.txt'
+    if os.path.exists( 'low_price.txt' ):
+        with open( filepath, 'r' ) as myfile:
+            price = json.loads( myfile.read() )
+            found=1
+            myfile.close()
+            Disp = ' قیمت کران پایین '+str(price)
+
+    filepath = os.getcwd() + '//' + 'high_price.txt'
+    if os.path.exists( 'high_price.txt' ):
+        with open( filepath, 'r' ) as myfile:
+            price = json.loads( myfile.read() )
+            found = found+1
+            myfile.close()
+            Disp = '\n'+'قیمت کران بالا'+str(price)+'\n'+Disp
+
+    if found==0:
+        update.message.reply_text( 'مدیر گرامی در حال حاضر هیچ قیمت پایه ای ثبت نشده است' )
+
+    else:
+        update.message.reply_text( Disp )
+
+
+
+
 def echo(bot, update):
     """Echo the user message."""
 
@@ -1782,7 +1815,7 @@ def echo(bot, update):
                             bot.sendMessage( update.message.chat_id, text='کاربر مورد نظر با موفقیت حذف گردید' )
                         break
 
-                elif txt == 'show':
+                elif txt == 'show_b':
                     show_deposite_members( update )
                     break
                 elif txt == 'id':
@@ -1820,6 +1853,9 @@ def echo(bot, update):
                     high_price = int(texts[1])
                     submitting_basic_prices_in_systemfile('high_price', high_price*1000)
 
+
+                elif txt=='show_p':
+                    show_base_price()
 
         elif (dict['message']['from']['username'] == update.message.text):
 
