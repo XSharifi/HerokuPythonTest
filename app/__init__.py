@@ -1855,7 +1855,7 @@ def echo(bot, update):
 
 
                 elif txt=='show_p':
-                    show_base_price()
+                    show_base_price(update)
 
         elif (dict['message']['from']['username'] == update.message.text):
 
