@@ -9,16 +9,15 @@ from queue import Queue
 from threading import Thread
 import json
 import ast
-
 import emoji
 from collections import defaultdict
+import pymongo
 
 
 class AutoTree( dict ):
     def __missing__(self, key):
         value = self[key] = type( self )()
         return value
-
 
 global Main_Dict
 global temp_Main_Dict
@@ -54,6 +53,9 @@ Base_for_Selling = 1
 
 TOKEN = "859896296:AAENaPuUpPrAkUH6GP111hid32biyDrWbDk"  # Auction_currency_bot
 webhook_address = "https://auction-currency-bot.herokuapp.com//" + TOKEN
+
+client = pymongo.MongoClient("mongodb+srv://xaniar:golestan11619@cluster0-dr8y0.mongodb.net/test?retryWrites=true" )
+
 
 bot = Bot( TOKEN )
 
@@ -399,6 +401,24 @@ def calculating_for_base_price(txts, update):
         return
 
 
+
+
+
+
+def checking_real_value_of_price(price,value_of_low_price,value_of_high_price):
+
+    if price<500:
+        price = value_of_high_price + price
+    elif price>=500 and len(str(abs(price)))==3:
+        price = value_of_low_price + price
+
+    elif len(str(abs(price))) == 5:
+        price = price
+
+    return price
+
+
+
 def text_analysing(txts, Dict_message, update):
     texts = txts.split()
     global Base_for_Selling
@@ -415,6 +435,7 @@ def text_analysing(txts, Dict_message, update):
     global temp_Dict_id_of_seller
     global temp_Dict_id_of_buyer
     global temp_Main_Dict
+
 
     for text in texts:
 
@@ -472,23 +493,16 @@ def text_analysing(txts, Dict_message, update):
                                                 myfile1.close()
 
 
-                                        elif Dict_id_of_buyer[str( seller_id )][str( last_offer_id )][
-                                            'status'] == 'sold':
-                                            update.message.reply_text(
-                                                "فروشنده گرامی بسته ای که شما رپلای کرده اید قبلا فرخته شده است، لطفا بشتر دقت کنید " )
+                                        elif Dict_id_of_buyer[str( seller_id )][str( last_offer_id )]['status'] == 'sold':
+                                            update.message.reply_text("فروشنده گرامی بسته ای که شما رپلای کرده اید قبلا فرخته شده است، لطفا بشتر دقت کنید " )
                                             return
 
-                                        elif Dict_id_of_buyer[str( seller_id )][str( last_offer_id )][
-                                            'status'] == 'changed':
-                                            update.message.reply_text(
-                                                "فروشنده بسته ای که شما رپلای کرده اید قبلا توسط خریدار تغییر یافته و یک پیشنهاد جدیدی را جایگزین آن کرده است لطفا بیشتر دقت کنید " )
+                                        elif Dict_id_of_buyer[str( seller_id )][str( last_offer_id )]['status'] == 'changed':
+                                            update.message.reply_text("فروشنده بسته ای که شما رپلای کرده اید قبلا توسط خریدار تغییر یافته و یک پیشنهاد جدیدی را جایگزین آن کرده است لطفا بیشتر دقت کنید " )
                                             return
-
-
 
                                     else:
-                                        update.message.reply_text(
-                                            "فروشنده گرامی پیغام که شما رپلایی کرده اید، مربوط به خریدار نیست " )
+                                        update.message.reply_text("فروشنده گرامی پیغام که شما رپلایی کرده اید، مربوط به خریدار نیست " )
                                         return
 
 
@@ -503,6 +517,10 @@ def text_analysing(txts, Dict_message, update):
 
                     print( 'state of determined base sell : ', detemined_Base_sell )
                     price_for_selling, Backage_Number_of_seller = calculating_for_int_number_selling( txts, update )
+                    low_price = getting_basic_prices_in_systemfile('low_price')
+                    high_price = getting_basic_prices_in_systemfile('high_price')
+                    price_for_selling = checking_real_value_of_price(price_for_selling,low_price,high_price)
+
                     print( 'price and package of seller : ', price_for_selling, Backage_Number_of_seller )
                     # text_id,package_number,message_id,valid,Bidder,status +++ offer_id
 
@@ -769,6 +787,10 @@ def text_analysing(txts, Dict_message, update):
                 except KeyError:
 
                     price_for_buying, Backage_Number_of_buyer = calculating_for_int_number( txts, update )
+
+                    low_price = getting_basic_prices_in_systemfile('low_price')
+                    high_price = getting_basic_prices_in_systemfile('high_price')
+                    price_for_buying = checking_real_value_of_price(price_for_selling,low_price,high_price)
                     print( 'price and package of buyer : ', price_for_buying, Backage_Number_of_buyer )
 
                     buyer_id = str( Dict_message['message']['from']['id'] )
@@ -876,9 +898,7 @@ def text_analysing(txts, Dict_message, update):
                                 # print('++++++++++ dict id of seller in Barakat :',Dict_id_of_seller)
                                 filepath = os.getcwd() + '//' + 'Dict_id_of_seller.txt'
 
-                                if os.path.exists(
-                                        'Dict_id_of_seller.txt' ):  # if Dict_id_of_seller.get(str(seller_id)) is not None:  # it is shown that it is a real seller
-
+                                if os.path.exists('Dict_id_of_seller.txt' ):  # if Dict_id_of_seller.get(str(seller_id)) is not None:  # it is shown that it is a real seller
                                     with open( filepath, 'r' ) as myfile:
                                         temp_Dict_id_of_seller = json.loads( myfile.read() )
                                         myfile.close()
@@ -909,6 +929,28 @@ def text_analysing(txts, Dict_message, update):
 
                                                 Accepted_Bidding, Backage_Number_of_buyer = calculating_for_int_number_of_Buyer(
                                                     temp_text, update, last_offer_id, Dict_message )
+
+                                                low_price = getting_basic_prices_in_systemfile( 'low_price' )
+                                                high_price = getting_basic_prices_in_systemfile( 'high_price' )
+                                                Accepted_Bidding = checking_real_value_of_price( Accepted_Bidding,
+                                                                                                 low_price, high_price )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                                                 print( 'Package number for buyer : ', Backage_Number_of_buyer )
                                                 print( 'Number of package for seller',
@@ -945,7 +987,22 @@ def text_analysing(txts, Dict_message, update):
                                                             temp_agreement_price, loss_profit_of_seller, loss_profit_of_buyer = calculating_loss_and_profit_of_seller_and_buyer(
                                                                 int( Base_for_Selling ), Accepted_Bidding,
                                                                 Backage_Number_of_buyer )
+
+                                                            low_price = getting_basic_prices_in_systemfile(
+                                                                'low_price' )
+                                                            high_price = getting_basic_prices_in_systemfile(
+                                                                'high_price' )
+                                                            temp_agreement_price = checking_real_value_of_price(
+                                                                temp_agreement_price,
+                                                                low_price, high_price )
+
+
+
                                                             if temp_agreement_price != Accepted_Bidding:
+
+
+
+
                                                                 Accepted_Bidding = temp_agreement_price
                                                         else:
                                                             loss_profit_of_seller = loss_profit_of_buyer = 0
@@ -1143,6 +1200,14 @@ def text_analysing(txts, Dict_message, update):
                                                 Accepted_Bidding, Backage_Number_of_seller = calculating_for_int_number_of_seller(
                                                     temp_text, update, last_offer_id, Dict_message )
 
+
+
+                                                low_price = getting_basic_prices_in_systemfile( 'low_price' )
+                                                high_price = getting_basic_prices_in_systemfile( 'high_price' )
+                                                Accepted_Bidding = checking_real_value_of_price( Accepted_Bidding,
+                                                                                                 low_price, high_price )
+
+
                                                 print( 'Package number for buyer : ', Backage_Number_of_buyer )
                                                 print( 'Number of package for seller',
                                                        Dict_id_of_buyer[str( buyer_id )][str( last_offer_id )][
@@ -1178,6 +1243,12 @@ def text_analysing(txts, Dict_message, update):
                                                             temp_agreement_price, loss_profit_of_seller, loss_profit_of_buyer = calculating_loss_and_profit_of_seller_and_buyer(
                                                                 int( Base_for_Selling ), Accepted_Bidding,
                                                                 Backage_Number_of_buyer )
+
+                                                            low_price = getting_basic_prices_in_systemfile('low_price' )
+                                                            high_price = getting_basic_prices_in_systemfile('high_price' )
+                                                            temp_agreement_price = checking_real_value_of_price(temp_agreement_price,low_price, high_price )
+
+
                                                             if temp_agreement_price != Accepted_Bidding:
                                                                 Accepted_Bidding = temp_agreement_price
                                                         else:
@@ -1646,70 +1717,166 @@ def echo(bot, update):
         text_analysing( update.message.text, dict, update )
 
 
+    elif (dict['message']['chat']['type'] == 'private'):
+
+        texts = update.message.text.split( '#' )
+
+        # for txt in texts:
+
+        if (dict['message']['from']['username'] == 'zanyar_sharifi') or \
+                (dict['message']['from']['username'] == 'Xaniar_kh91') or \
+                (dict['message']['from']['username'] == 'xaniar_sharifi'):
+
+            for txt in texts:
+
+                if txt == 'all':
+
+                    operating_account_of_all_members( update )
+                    break
+
+                elif txt == 'reset' or txt == 'Reset':
+
+                    print( 'comming to new stage for deleting' )
+                    Delete_all_the_files()
+                    break
+
+                elif txt == 'b' and update.message.text != 'b':
+                    username_id = texts[1]
+                    Deposit = texts[2]
+                    print( 'username :', username_id )
+                    print( 'Deposite : ', Deposit )
+                    filepath = os.getcwd() + '//' + 'Dict_of_Deposit.txt'
+                    if os.path.exists( 'Dict_of_Deposit.txt' ):
+                        with open( filepath, 'r' ) as myfile:
+                            Dict_of_Deposit = json.loads( myfile.read() )
+                            myfile.close()
+                            if Dict_of_Deposit.get( username_id ) is not None:
+                                update.message.reply_text(
+                                    'کاربر گرامی، نام کاربرری که وارد کرده اید قبلا ثبت شده است' )
+                                return
+
+                    print( 'comming to this new circumestance' )
+                    Dict_of_Deposit[username_id] = str( int( Deposit ) * 1000000 )
+                    print( Dict_of_Deposit )
+                    with open( filepath, 'w+' ) as myfile:
+                        myfile.write( json.dumps( Dict_of_Deposit ) )
+                        myfile.close()
+                    print( 'all the data of members are stored' )
+
+                elif txt == 'D':
+                    if texts[1] == 'user':
+                        # pattern for detecting is D#username#'id_of_username'
+                        id_of_username = texts[2]
+
+                        filepath = os.getcwd() + '//' + 'Dict_of_Deposit.txt'
+                        if os.path.exists( 'Dict_of_Deposit.txt' ):
+                            with open( filepath, 'r' ) as myfile:
+                                Dict_of_Deposit = json.loads( myfile.read() )
+                                myfile.close()
+
+                        if Dict_of_Deposit.get( str( id_of_username ) ):
+                            del Dict_of_Deposit[id_of_username]
+                            with open( filepath, 'w+' ) as myfile:
+                                myfile.write( json.dumps( Dict_of_Deposit ) )
+                                myfile.close()
+                            bot.sendMessage( update.message.chat_id, text='کاربر مورد نظر با موفقیت حذف گردید' )
+                        break
+
+                elif txt == 'show':
+                    show_deposite_members( update )
+                    break
+                elif txt == 'id':
+                    filepath = os.getcwd() + '//' + 'Dict_of_Username_id.txt'
+
+                    if os.path.exists( 'Dict_of_Username_id.txt' ):
+                        with open( filepath, 'r' ) as myfile:
+                            Dict_of_Username_id = json.loads( myfile.read() )
+                            myfile.close()
+
+                    filepath = os.getcwd() + '//' + 'Main_Dict.txt'
+
+                    if os.path.exists( 'Main_Dict.txt' ):
+                        with open( filepath, 'r' ) as myfile:
+                            Main_Dict = json.loads( myfile.read() )
+                            myfile.close()
+
+                    print( Dict_of_Username_id )
+                    print('comming to this state')
+                    username = texts[1]
+                    print('username of user : ',username)
+                    if Dict_of_Username_id.get(  username.replace(" ", "" ) ) is not None:
+                        # .replace(" ","")
+                        doing_accounting_of_a_member( username, update )
+                    else:
+                        update.message.reply_text( "کاربر گرامی نام کاربری (آیدی) با این مشخصات وجود ندارد" )
+                        return
+                    break
+
+                elif txt=='low_price':
+                    low_price = int(texts[1])
+                    submitting_basic_prices_in_systemfile('low_price',low_price*1000)
+
+                elif txt=='high_price':
+                    high_price = int(texts[1])
+                    submitting_basic_prices_in_systemfile('high_price', high_price*1000)
 
 
+        elif (dict['message']['from']['username'] == update.message.text):
 
-    elif    (dict['message']['chat']['type'] == 'private' and dict['message']['from']['username'] == 'zanyar_sharifi' and update.message.text == 'all') or \
-            (dict['message']['chat']['type'] == 'private' and dict['message']['from']['username'] == 'Xaniar_kh91' and update.message.text == 'all') or \
-            (dict['message']['chat']['type'] == 'private' and dict['message']['from']['username'] == 'Nasrabed' and update.message.text == 'all')or \
-            (dict['message']['chat']['type'] == 'private' and dict['message']['from']['username'] == 'ali_nazi_66' and update.message.text == 'all')or \
-            (dict['message']['chat']['type'] == 'private' and dict['message']['from']['username'] == 'Ali1369Sadra' and update.message.text == 'all')or \
-            (dict['message']['chat']['type'] == 'private' and dict['message']['from']['username'] == 'xaniar_sharifi' and update.message.text == 'all'):
+            filepath = os.getcwd() + '//' + 'Dict_of_Username_id.txt'
 
-        filepath = os.getcwd() + '//' + 'Main_Dict.txt'
-        if os.path.exists( 'Main_Dict.txt' ):
-            with open( filepath, 'r' ) as myfile:
-                Main_Dict = json.loads( myfile.read() )
-                myfile.close()
+            if os.path.exists( 'Dict_of_Username_id.txt' ):
+                with open( filepath, 'r' ) as myfile:
+                    Dict_of_Username_id = json.loads( myfile.read() )
+                    myfile.close()
 
-        filepath = os.getcwd() + '//' + 'Dict_of_id_to_Username.txt'
-        if os.path.exists( 'Dict_of_id_to_Username.txt' ):
-            with open( filepath, 'r' ) as myfile:
-                Dict_of_id_to_Username = json.loads( myfile.read() )
-                myfile.close()
+            filepath = os.getcwd() + '//' + 'Main_Dict.txt'
 
-        operating_account_of_all_members( update )
+            if os.path.exists( 'Main_Dict.txt' ):
+                with open( filepath, 'r' ) as myfile:
+                    Main_Dict = json.loads( myfile.read() )
+                    myfile.close()
 
-    elif    (dict['message']['chat']['type'] == 'private' and dict['message']['from'][ 'username'] == 'zanyar_sharifi' and (update.message.text == 'reset' or update.message.text == 'Reset')) or \
-            (dict['message']['chat']['type'] == 'private' and dict['message']['from']['username'] == 'Xaniar_kh91' and (update.message.text == 'reset' or update.message.text == 'Reset'))or \
-            (dict['message']['chat']['type'] == 'private' and dict['message']['from']['username'] == 'Nasrabed' and (update.message.text == 'reset' or update.message.text == 'Reset'))or \
-            (dict['message']['chat']['type'] == 'private' and dict['message']['from']['username'] == 'ali_nazi_66' and (update.message.text == 'reset' or update.message.text == 'Reset'))or \
-            (dict['message']['chat']['type'] == 'private' and dict['message']['from']['username'] == 'Ali1369Sadra' and (update.message.text == 'reset' or update.message.text == 'Reset'))or \
-            (dict['message']['chat']['type'] == 'private' and dict['message']['from']['username'] == 'xaniar_sharifi' and (update.message.text == 'reset' or update.message.text == 'Reset')):
-
-        print( 'comming to new stage for ' )
-        Delete_all_the_files()
+            print( Dict_of_Username_id )
+            if Dict_of_Username_id.get( update.message.text.replace( " ", "" ) ) is not None:
+                # .replace(" ","")
+                doing_accounting_of_a_member( update.message.text, update )
+            else:
+                update.message.reply_text( "کاربر گرامی نام کاربری (آیدی) با این مشخصات وجود ندارد" )
 
 
-    elif    (dict['message']['chat']['type'] == 'private' and dict['message']['from']['username'] == update.message.text) or \
-            (dict['message']['chat']['type'] == 'private' and dict['message']['from']['username'] == 'zanyar_sharifi') or \
-            (dict['message']['chat']['type'] == 'private' and dict['message']['from']['username'] == 'Xaniar_kh91')or \
-            (dict['message']['chat']['type'] == 'private' and dict['message']['from']['username'] == 'Nasrabed')or \
-            (dict['message']['chat']['type'] == 'private' and dict['message']['from']['username'] == 'ali_nazi_66')or \
-            (dict['message']['chat']['type'] == 'private' and dict['message']['from']['username'] == 'Ali1369Sadra')or \
-            (dict['message']['chat']['type'] == 'private' and dict['message']['from']['username'] == 'xaniar_sharifi'):
+def submitting_basic_prices_in_DataBase(field_name,price):
 
-        filepath = os.getcwd() + '//' + 'Dict_of_Username_id.txt'
+    db = client.test
+    Base_price_auction = {"_id": "236", str(field_name): str(price)}
+    settings = db.settings
+    post_id = settings.insert_one(Base_price_auction).inserted_id
+    print( db.collection_names(include_system_collections=True))
 
-        if os.path.exists( 'Dict_of_Username_id.txt' ):
-            with open( filepath, 'r' ) as myfile:
-                Dict_of_Username_id = json.loads( myfile.read() )
-                myfile.close()
 
-        filepath = os.getcwd() + '//' + 'Main_Dict.txt'
+def getting_basic_prices_in_DataBase(field_name):
 
-        if os.path.exists( 'Main_Dict.txt' ):
-            with open( filepath, 'r' ) as myfile:
-                Main_Dict = json.loads( myfile.read() )
-                myfile.close()
+    db = client.test
+    Base_price_auction = {"_id": "236", str(field_name): str(price)}
+    settings = db.settings
+    post_id = settings.insert_one(Base_price_auction).inserted_id
+    print( db.collection_names(include_system_collections=True))
 
-        print( Dict_of_Username_id )
-        if Dict_of_Username_id.get( update.message.text.replace( " ", "" ) ) is not None:
-            # .replace(" ","")
-            doing_accounting_of_a_member( update.message.text, update )
-        else:
-            update.message.reply_text( "کاربر گرامی نام کاربری (آیدی) با این مشخصات وجود ندارد" )
 
+def submitting_basic_prices_in_systemfile(filename,price):
+    filepath = os.getcwd() + '//' + str(filename)+'.txt'
+    with open( filepath, 'w+' ) as myfile:
+        myfile.write( str(price) )
+        myfile.close()
+        print('--------------------- '+str(filename)+' is stored')
+
+def getting_basic_prices_in_systemfile(filename):
+    filepath = os.getcwd() + '//' + str(filename)+'.txt'
+    with open( filepath, 'r' ) as myfile:
+        price = myfile.read()
+        myfile.close()
+        print('--------------------- '+str(filename)+' is returned')
+        return int(price)
 
 def main():
     # dp.start()
@@ -1721,6 +1888,5 @@ def main():
 
 
 main()
-
 
 
