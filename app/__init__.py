@@ -1111,7 +1111,7 @@ def text_analysing(txts, Dict_message, update):
 
                                                 stt3 = '\n' + ' بسته : ' + str( Backage_Number_of_buyer )
                                                 stt4 = '\n' + ' قیمت  : ' + str( Accepted_Bidding )
-                                                stt5 = '\n' + 'مدیریت نوسان بروکر'
+                                                stt5 = '\n' + 'مدیریت گروه یک بسته'
                                                 msg = stt1 + stt2 + stt3 + stt4 + stt5
 
                                                 try:
@@ -1358,7 +1358,7 @@ def text_analysing(txts, Dict_message, update):
 
                                                 stt3 = '\n' + ' بسته : ' + str( Backage_Number_of_buyer )
                                                 stt4 = '\n' + ' قیمت  : ' + str( Accepted_Bidding )
-                                                stt5 = '\n' + 'مدیریت نوسان بروکر'
+                                                stt5 = '\n' + 'مدیریت گروه یک بسته'
                                                 msg = stt1 + stt2 + stt3 + stt4 + stt5
 
                                                 try:
@@ -1658,7 +1658,7 @@ def set_webhook():
 def start(bot, update, args):
     telegram_user = update.message.from_user
 
-    bot.sendMessage( update.message.chat_id, text="به ربات مدیریت نوسان بروکر خوش آمدید " )
+    bot.sendMessage( update.message.chat_id, text="به ربات مدیریت مدیریت یک بسته خوش آمدید " )
 
 
 def help(bot, update):
