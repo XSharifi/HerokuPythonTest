@@ -865,7 +865,7 @@ def text_analysing(txts, Dict_message, update):
                             myfile.close()
 
 
-            elif text == "برکت":  # text of seller
+            elif text == "ب":  # text of seller
 
                 try:
                     if Dict_message['message']['reply_to_message']['from'][
