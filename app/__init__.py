@@ -868,8 +868,7 @@ def text_analysing(txts, Dict_message, update):
             elif text == "ب":  # text of seller
 
                 try:
-                    if Dict_message['message']['reply_to_message']['from'][
-                        'id']:  # for checking that if this message is replyed or not  Dict_message.get(Dict_message['message'],{}).get('reply_to_message',{}) is not None:
+                    if Dict_message['message']['reply_to_message']['from']['id']:  # for checking that if this message is replyed or not  Dict_message.get(Dict_message['message'],{}).get('reply_to_message',{}) is not None:
 
 
                         # Reset_all_the_data()
