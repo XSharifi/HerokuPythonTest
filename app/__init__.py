@@ -517,6 +517,7 @@ def text_analysing(txts, Dict_message, update):
 
                     print( 'state of determined base sell : ', detemined_Base_sell )
                     price_for_selling, Backage_Number_of_seller = calculating_for_int_number_selling( txts, update )
+
                     low_price = getting_basic_prices_in_systemfile('low_price')
                     high_price = getting_basic_prices_in_systemfile('high_price')
                     price_for_selling = checking_real_value_of_price(price_for_selling,low_price,high_price)
@@ -713,8 +714,7 @@ def text_analysing(txts, Dict_message, update):
 
                             if txt == 'ف':
 
-                                print( '>>>>>>> id of seller',
-                                       str( Dict_message['message']['reply_to_message']['from']['id'] ) )
+                                print( '>>>>>>> id of seller', str( Dict_message['message']['reply_to_message']['from']['id'] ) )
 
                                 seller_id = Dict_message['message']['reply_to_message']['from']['id']
 
@@ -787,7 +787,7 @@ def text_analysing(txts, Dict_message, update):
 
                     low_price = getting_basic_prices_in_systemfile('low_price')
                     high_price = getting_basic_prices_in_systemfile('high_price')
-                    price_for_buying = checking_real_value_of_price(price_for_selling,low_price,high_price)
+                    price_for_buying = checking_real_value_of_price(price_for_buying,low_price,high_price)
                     print( 'price and package of buyer : ', price_for_buying, Backage_Number_of_buyer )
 
                     buyer_id = str( Dict_message['message']['from']['id'] )
