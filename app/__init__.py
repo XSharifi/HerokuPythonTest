@@ -1492,16 +1492,14 @@ def operating_account_of_all_members(update):
                 print( 'other_dealing_person', other_dealing_person )
 
             else:
-                other_dealing_person = '\n' + '  خریدار ' + str(
-                    Main_Dict[str( key )][str( i + 1 )]['alternative_username'] )
+                other_dealing_person = '\n' + '  خریدار ' + str(Main_Dict[str( key )][str( i + 1 )]['alternative_username'] )
                 print( 'other_dealing_person', other_dealing_person )
 
             distinct_var = '\n----------------------------\n'
             Disp = transaction_number + package_number + loss_profit + other_dealing_person + price_of_agreement + distinct_var + Disp
             totall = Main_Dict[str( key )][str( i + 1 )]['loss_profit'] + totall
 
-        Disp = seperator + '\n' + Username + ' تعداد تراکنش مالی ' + '\n' + str( counter ) + '\n' + str(
-            totall ) + '\n' + 'مجموع سود و زیان' + '\n' + Disp
+        Disp = seperator + '\n' + Username + ' تعداد تراکنش مالی ' + '\n' + str( counter ) + '\n' + str( totall ) + '\n' + 'مجموع سود و زیان' + '\n' + Disp
 
         update.message.reply_text( Disp )
 
