@@ -25,6 +25,3 @@ SQLAlchemy
 Werkzeug
 gunicorn
 python-telegram-bot
-emoji
-pymongo
-dnspython
