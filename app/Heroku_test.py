@@ -5,7 +5,7 @@ from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Dispatcher,CommandHandler, MessageHandler, Filters
 from queue import Queue
 from threading import Thread
-TOKEN = '765185530:AAGaBUP8CiLfzPhpfni2NcUfpUnPodm7oAg'
+TOKEN = '7651855:AAGaBUPi2NcUfpUnPodm7oAg'
 bot = Bot(TOKEN)
 update_queue = Queue()
 
